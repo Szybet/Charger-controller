@@ -35,3 +35,6 @@ RESOURCES += \
 
 # INCLUDEPATH += $$PWD/lib/libevdev/libevdev
 # DEPENDPATH += $$PWD/lib/libevdev/libevdev
+
+DISTFILES += \
+    charger-manager.sh
