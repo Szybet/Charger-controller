@@ -48,7 +48,7 @@ main_menu::main_menu(QDialog *parent)
     // Nothing other works
     QRect screenSize = QGuiApplication::screens()[0]->geometry();
     int dialogX = (screenSize.width() / 5) * 3;
-    int dialogY = (screenSize.height() / 9) * 3;
+    int dialogY = (screenSize.height() / 6) * 3;
     int positionX = ((screenSize.width() - dialogX) / 2);
     int positionY = ((screenSize.height() - dialogY) / 2);
     qDebug() << dialogX << dialogY << positionX << positionY;
@@ -60,7 +60,6 @@ main_menu::main_menu(QDialog *parent)
     QFile file(config.path() + ("/time"));
     if(config.exists() == false) {
         config.mkpath(config.path());
-
     }
     else {
         qDebug() << "so the dir exists";
@@ -72,7 +71,7 @@ main_menu::main_menu(QDialog *parent)
             qDebug() << "Timeout is: " << timeout;
         } else {
             file.resize(0);
-            file.write("4");
+            file.write("8"); // default value
         }
         file.close();
     }
@@ -188,19 +187,8 @@ void main_menu::applySettings() {
         }
         usbDev.close();
 
-        // Change orientation
-        // Don't ask questions why it doesn't work always after first time
-        QFile fbOrientation("/sys/class/graphics/fb0/rotate");
-        for(int i = 0; i < 3; i++) {
-            if (fbOrientation.open(QIODevice::WriteOnly | QIODevice::Text) == false) {
-                qDebug() << "Couldn't open fb rotate file";
-            }
-            else {
-                QTextStream out(&fbOrientation);
-                out << "2" << Qt::endl;
-            }
-            fbOrientation.close();
-        }
+        // One more time to be sure
+        launchProcess("/usr/sbin/i2cset", i2cArgs);
 
         exitApp();
     }
