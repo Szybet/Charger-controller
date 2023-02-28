@@ -144,7 +144,7 @@ void main_menu::on_StopButton_clicked()
 void main_menu::on_cancelButton_clicked()
 {
     stop = true;
-    QApplication::exit();
+    exitApp();
 }
 
 void main_menu::on_AcceptButton_clicked()
@@ -178,17 +178,37 @@ void main_menu::applySettings() {
             launchProcess("/bin/mount", mount_arg);
             QThread::msleep(100);
         }
-        QFile usbRole("/sys/kernel/debug/ci_hdrc.0/role");
-        if (usbRole.open(QIODevice::WriteOnly | QIODevice::Text) == false) {
-            qDebug() << "Couldn't open role file";
+        QFile usbDev("/sys/kernel/debug/ci_hdrc.0/role");
+        if (usbDev.open(QIODevice::WriteOnly | QIODevice::Text) == false) {
+            qDebug() << "Couldn't open usb device file";
         }
-        QTextStream out(&usbRole);
-        out << "host" << Qt::endl;
-        usbRole.close();
+        else {
+            QTextStream out(&usbDev);
+            out << "host" << Qt::endl;
+        }
+        usbDev.close();
 
-        for(int pid: pidList) {
-            unfreezeApp(pid);
+        // Change orientation
+        // Don't ask questions why it doesn't work always after first time
+        QFile fbOrientation("/sys/class/graphics/fb0/rotate");
+        for(int i = 0; i < 3; i++) {
+            if (fbOrientation.open(QIODevice::WriteOnly | QIODevice::Text) == false) {
+                qDebug() << "Couldn't open fb rotate file";
+            }
+            else {
+                QTextStream out(&fbOrientation);
+                out << "2" << Qt::endl;
+            }
+            fbOrientation.close();
         }
-         QApplication::exit();
+
+        exitApp();
     }
+}
+
+void main_menu::exitApp() {
+    for(int pid: pidList) {
+        unfreezeApp(pid);
+    }
+    QApplication::exit();
 }

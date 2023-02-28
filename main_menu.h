@@ -28,19 +28,13 @@ public:
 public slots:
     void secondPassed();
     void applySettings();
-
+    void exitApp();
 
 private slots:
-
-
     void on_plusButton_clicked();
-
     void on_minusButton_clicked();
-
     void on_StopButton_clicked();
-
     void on_cancelButton_clicked();
-
     void on_AcceptButton_clicked();
 
 private:

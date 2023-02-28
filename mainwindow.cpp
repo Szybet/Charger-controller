@@ -15,11 +15,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    // remove this after
     this->ui->centralwidget->setStyleSheet("background-image:url(\"/external_root/tmp/background.png\"); background-position: center;");
 
     QTimer::singleShot(100, this, &MainWindow::launchDialog);
-
 }
 
 MainWindow::~MainWindow()
@@ -29,7 +27,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::launchDialog() {
     qDebug() << "Launching dialog";
-
     main_menu* mainMenuDialog = new main_menu;
     mainMenuDialog->setWindowFlag(Qt::FramelessWindowHint);
     mainMenuDialog->exec();
