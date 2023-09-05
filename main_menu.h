@@ -24,6 +24,7 @@ public:
     int timePassed = 0;
     QTimer timer;
     bool stop = false;
+    bool confirmationNeeded = true;
 
 public slots:
     void secondPassed();
@@ -36,6 +37,8 @@ private slots:
     void on_StopButton_clicked();
     void on_cancelButton_clicked();
     void on_AcceptButton_clicked();
+
+    void on_confirmationCheckBox_stateChanged(int arg1);
 
 private:
     Ui::main_menu *ui;

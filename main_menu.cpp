@@ -30,10 +30,10 @@ main_menu::main_menu(QDialog *parent)
 
     // items
     ui->progressBar->setFormat("");
-    ui->label->setStyleSheet("font-size: 7pt;");
+    ui->label->setStyleSheet("font-size: 11pt;");
 
-    ui->label_2->setStyleSheet("font-size: 7pt;");
-    ui->labelSeconds->setStyleSheet("font-size: 7pt;");
+    ui->label_2->setStyleSheet("font-size: 11pt;");
+    ui->labelSeconds->setStyleSheet("font-size: 11pt;");
 
     ui->StopButton->setStyleSheet("font-size: 7pt;");
     ui->cancelButton->setStyleSheet("font-size: 7pt;");
@@ -57,23 +57,37 @@ main_menu::main_menu(QDialog *parent)
     this->setFixedSize(QSize(dialogX, dialogY));
 
     QDir config = QDir(".config/e-1-charger_manager");
-    QFile file(config.path() + ("/time"));
+    QFile fileTime(config.path() + ("/time"));
+    QFile fileConf(config.path() + ("/confirmation"));
     if(config.exists() == false) {
         config.mkpath(config.path());
     }
     else {
         qDebug() << "so the dir exists";
-        qDebug() << file;
-        file.open(QIODevice::ReadWrite);
-        if(file.exists() == true) {
-            timeout = file.readAll().replace("\n", "").toInt();
+        qDebug() << fileTime;
+        fileTime.open(QIODevice::ReadWrite);
+        if(fileTime.exists() == true) {
+            timeout = fileTime.readAll().replace("\n", "").toInt();
             ui->labelSeconds->setText(QString::number(timeout));
             qDebug() << "Timeout is: " << timeout;
         } else {
-            file.resize(0);
-            file.write("8"); // default value
+            fileTime.resize(0);
+            fileTime.write("8"); // default value
         }
-        file.close();
+        fileTime.close();
+
+        fileConf.open(QIODevice::ReadWrite);
+        if(fileConf.exists() == true) {
+            bool checked = fileConf.readAll().replace("\n", "").toInt();
+            confirmationNeeded = checked;
+            ui->confirmationCheckBox->setChecked(checked);
+            qDebug() << "Checked is: " << checked;
+        } else {
+            fileConf.resize(0);
+            fileConf.write("1"); // default value
+            ui->confirmationCheckBox->setChecked(1);
+        }
+        fileConf.close();
     }
     ui->progressBar->setRange(0, timeout);
     ui->progressBar->setValue(0);
@@ -94,7 +108,9 @@ void main_menu::secondPassed() {
             ui->progressBar->setValue(timePassed);
             timer.singleShot(1000, this, SLOT(secondPassed()));
         } else {
-            applySettings();
+            if(confirmationNeeded == false) {
+                applySettings();
+            }
         }
     } else {
         qDebug() << "End timer stop";
@@ -137,7 +153,7 @@ void main_menu::on_minusButton_clicked()
 
 void main_menu::on_StopButton_clicked()
 {
-     stop = true;
+    stop = true;
 }
 
 void main_menu::on_cancelButton_clicked()
@@ -199,4 +215,15 @@ void main_menu::exitApp() {
         unfreezeApp(pid);
     }
     QApplication::exit();
+}
+
+void main_menu::on_confirmationCheckBox_stateChanged(int arg1)
+{
+    QDir config = QDir(".config/e-1-charger_manager");
+    QFile fileConf(config.path() + ("/confirmation"));
+    fileConf.open(QIODevice::ReadWrite);
+    fileConf.resize(0);
+    fileConf.write(QString::number(arg1).toUtf8());
+    fileConf.close();
+    confirmationNeeded = arg1;
 }
